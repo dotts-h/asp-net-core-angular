@@ -1,8 +1,21 @@
+using HealthCheck;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHealthChecks()
+    .AddCheck("ICMP_01",
+        new ICMPHealthCheck("www.rydael.com", 100))
+    .AddCheck("ICMP_02",
+        new ICMPHealthCheck("www.google.com", 100))
+    .AddCheck("ICMP_03",
+        new ICMPHealthCheck("www.does-not-exist.com", 100))
+    .AddCheck("ICMP_04",
+        new ICMPHealthCheck("www.testmonkey.com", 100))
+    .AddCheck("ICMP_05",
+        new ICMPHealthCheck("heimdalsecurity.com", 100));
 
 var app = builder.Build();
 
@@ -24,7 +37,7 @@ app.UseStaticFiles(new StaticFileOptions()
 });
 app.UseRouting();
 
-
+app.MapHealthChecks("/hc", new CustomHealthCheckOptions());
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
